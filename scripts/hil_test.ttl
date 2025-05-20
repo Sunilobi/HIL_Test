@@ -1,0 +1,13 @@
+connect = '/C=COM3 /BAUD=9600'
+timeout = 10
+
+; Wait for Arduino boot
+wait 'READY'
+
+; Trigger test sequence
+sendln 'RUN_TESTS'
+wait 'TEST_COMPLETE'
+
+; Save final confirmation
+logwrite 'HIL_TEST_FINISHED'
+closett
