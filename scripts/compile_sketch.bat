@@ -1,33 +1,39 @@
 bool blinking = false;
+unsigned long previousMillis = 0;
+const long interval = 500; // milliseconds
+const int ledPin = LED_BUILTIN;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  Serial.println("=== Arduino Nano Diagnostic Test Start ===");
 }
 
 void loop() {
+  // Handle serial commands
   if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
-    command.trim();  // remove whitespace/newlines
+    command.trim();
 
-    if (command == "START") {
+    if (command.equalsIgnoreCase("START")) {
       blinking = true;
-      Serial.println("Blinking started");
-    }
-    else if (command == "STOP") {
+      Serial.println("Blinking started.");
+    } else if (command.equalsIgnoreCase("STOP")) {
       blinking = false;
-      digitalWrite(LED_BUILTIN, LOW);  // turn off LED immediately
-      Serial.println("Blinking stopped");
+      digitalWrite(ledPin, LOW);
+      Serial.println("Blinking stopped.");
+    } else {
+      Serial.print("Unknown command: ");
+      Serial.println(command);
     }
   }
 
+  // Handle LED blinking if active
   if (blinking) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(500);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(500);
-  }
-  else {
-    // Just stay idle or do other stuff here
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      digitalWrite(ledPin, !digitalRead(ledPin));
+    }
   }
 }
