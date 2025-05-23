@@ -1,5 +1,5 @@
 ; Start logging
-logopen '\\\\WIN-UONNUE003M4\\Network_Path\\hil_test_output.log'
+logopen 'C:\LRDE\HIL_Demo\hil_test_output.log'
 
 ; Connect to Arduino
 connect '/C=COM3 /BAUD=9600'
