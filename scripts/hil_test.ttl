@@ -1,24 +1,35 @@
-; Start logging to a shared network path (double-backslashes required)
+; Start logging
 logopen '\\\\WIN-UONNUE003M4\\Network_Path\\hil_test_output.log'
 
-; Connect to Arduino on COM3 at 9600 baud
+; Connect to Arduino
 connect '/C=COM3 /BAUD=9600'
+if result != 2 then
+  messagebox 'ERROR: Failed to connect to COM3.'
+  logclose
+  end
+endif
 
-; Set wait timeout in seconds
+; Wait for READY
 timeout = 10
-
-; Wait for Arduino to send READY signal
 wait 'READY'
+if result != 0 then
+  messagebox 'ERROR: READY not received.'
+  logclose
+  end
+endif
 
-; Send test start command
+; Send test command
 sendln 'RUN_TESTS'
 
-; Wait until Arduino sends test completion signal
+; Wait for completion
 wait 'TEST_COMPLETE'
+if result != 0 then
+  messagebox 'ERROR: TEST_COMPLETE not received.'
+  logclose
+  end
+endif
 
-; Log test completion marker
+; Final log
 logwrite 'HIL_TEST_FINISHED'
-
-; Close log and Tera Term
 logclose
 closett
