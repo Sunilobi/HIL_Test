@@ -1,43 +1,49 @@
 import serial
 import time
-from datetime import datetime
+import os
 
-PORT = 'COM3'  # Adjust this to your actual port
+PORT = "COM3"  # Update if needed
 BAUD = 9600
-LOGFILE = 'hil_test_output.log'
-
-def log(msg):
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    entry = f"[{timestamp}] {msg}"
-    print(entry)
-    with open(LOGFILE, 'a') as f:
-        f.write(entry + '\n')
+LOG_FILE = "logs/hil_test_output.log"
 
 def send_command(command):
     try:
         with serial.Serial(PORT, BAUD, timeout=2) as ser:
-            time.sleep(2)  # Wait for Arduino to reset
+            time.sleep(2)  # Wait for Arduino reset
             ser.write((command + '\n').encode())
-            log(f"> Sent: {command}")
-            response = ser.readline().decode().strip()
-            log(f"< Received: {response}")
+            print(f"[{timestamp()}] > Sent: {command}")
+            response = ser.readline().decode(errors='replace').strip()
+            print(f"[{timestamp()}] < Received: {response}")
+            return response
     except serial.SerialException as e:
-        log(f"Serial error: {e}")
+        print(f"[{timestamp()}] Serial error: {e}")
+        return None
 
-if __name__ == '__main__':
-    log("=== HIL Test Session Started ===")
+def timestamp():
+    return time.strftime("%Y-%m-%d %H:%M:%S")
 
-    send_command("START")
-    time.sleep(3)
+def main():
+    os.makedirs("logs", exist_ok=True)
 
-    send_command("STATUS")
-    send_command("MEASURE_VOLTAGE")
-    send_command("UPTIME")
+    with open(LOG_FILE, "w") as log:
+        def log_print(msg):
+            print(msg)
+            log.write(msg + "\n")
 
-    time.sleep(3)
-    send_command("STOP")
+        log_print(f"[{timestamp()}] === HIL Test Session Started ===")
 
-    send_command("STATUS")
-    send_command("UPTIME")
+        response = send_command("START")
+        time.sleep(2)
 
-    log("=== HIL Test Session Ended ===")
+        response = send_command("STATUS")
+        time.sleep(1)
+
+        response = send_command("MEASURE_VOLTAGE")
+        time.sleep(1)
+
+        response = send_command("STOP")
+
+        log_print(f"[{timestamp()}] === HIL Test Session Ended ===")
+
+if __name__ == "__main__":
+    main()
