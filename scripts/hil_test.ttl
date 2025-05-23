@@ -1,6 +1,6 @@
-logopen 'logs\\hil_test_output.log'  ; Create a log file (relative path)
+logopen '\\\\WIN-UONNUE003M4\\Network_Path\\hil_test_output.log'
 
-connect = '/C=COM3 /BAUD=9600'
+connect '/C=COM3 /BAUD=9600'
 timeout = 10
 
 wait 'READY'
