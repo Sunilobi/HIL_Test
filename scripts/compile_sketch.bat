@@ -1,39 +1,24 @@
-bool blinking = false;
-unsigned long previousMillis = 0;
-const long interval = 500; // milliseconds
-const int ledPin = LED_BUILTIN;
+@echo off
+REM === Set environment variables ===
+set ARDUINO_CLI=C:\ProgramData\chocolatey\bin\arduino-cli.exe
+set FQBN=arduino:avr:nano
+set SKETCH_DIR=%~dp0..\sketches\hil_demo
+set BUILD_DIR=%~dp0..\bin
 
-void setup() {
-  Serial.begin(9600);
-  pinMode(ledPin, OUTPUT);
-  Serial.println("=== Arduino Nano Diagnostic Test Start ===");
-}
+REM === Create build directory if not exists ===
+if not exist "%BUILD_DIR%" (
+    mkdir "%BUILD_DIR%"
+)
 
-void loop() {
-  // Handle serial commands
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
+REM === Compile the Arduino sketch ===
+"%ARDUINO_CLI%" compile ^
+    --fqbn %FQBN% ^
+    --build-path "%BUILD_DIR%" ^
+    "%SKETCH_DIR%"
 
-    if (command.equalsIgnoreCase("START")) {
-      blinking = true;
-      Serial.println("Blinking started.");
-    } else if (command.equalsIgnoreCase("STOP")) {
-      blinking = false;
-      digitalWrite(ledPin, LOW);
-      Serial.println("Blinking stopped.");
-    } else {
-      Serial.print("Unknown command: ");
-      Serial.println(command);
-    }
-  }
+IF %ERRORLEVEL% NEQ 0 (
+    echo Arduino compile failed!
+    exit /b %ERRORLEVEL%
+)
 
-  // Handle LED blinking if active
-  if (blinking) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;
-      digitalWrite(ledPin, !digitalRead(ledPin));
-    }
-  }
-}
+echo Sketch compiled successfully to %BUILD_DIR%
