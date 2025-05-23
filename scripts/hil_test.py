@@ -4,7 +4,6 @@ import os
 
 PORT = "COM3"  # Update if needed
 BAUD = 9600
-LOG_FILE = "logs/hil_test_output.log"
 
 def send_command(command):
     try:
@@ -23,27 +22,23 @@ def timestamp():
     return time.strftime("%Y-%m-%d %H:%M:%S")
 
 def main():
+    # Create logs directory just in case (optional)
     os.makedirs("logs", exist_ok=True)
 
-    with open(LOG_FILE, "w") as log:
-        def log_print(msg):
-            print(msg)
-            log.write(msg + "\n")
+    print(f"[{timestamp()}] === HIL Test Session Started ===")
 
-        log_print(f"[{timestamp()}] === HIL Test Session Started ===")
+    send_command("START")
+    time.sleep(2)
 
-        response = send_command("START")
-        time.sleep(2)
+    send_command("STATUS")
+    time.sleep(1)
 
-        response = send_command("STATUS")
-        time.sleep(1)
+    send_command("MEASURE_VOLTAGE")
+    time.sleep(1)
 
-        response = send_command("MEASURE_VOLTAGE")
-        time.sleep(1)
+    send_command("STOP")
 
-        response = send_command("STOP")
-
-        log_print(f"[{timestamp()}] === HIL Test Session Ended ===")
+    print(f"[{timestamp()}] === HIL Test Session Ended ===")
 
 if __name__ == "__main__":
     main()
